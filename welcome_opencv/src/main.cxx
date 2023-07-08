@@ -21,7 +21,7 @@ int main(int argc, const char * argv[]) {
 
 	//Convert the image to grayscale
 	Mat gray;
-	cvtColor(image, gray, CV_BGR2GRAY);
+	cvtColor(image, gray, cv::COLOR_BGR2GRAY);
 
 	//Display the image (cannot be run on the PYNQ Board)
 #ifndef __arm__
@@ -30,7 +30,7 @@ int main(int argc, const char * argv[]) {
 	imwrite("original_color.tif", gray);
 #endif
 
-	cvtColor(image, gray, CV_BGR2GRAY);
+	cvtColor(image, gray, cv::COLOR_BGR2GRAY);
 	resize(gray, gray, Size(64, 64));
 	gray.convertTo(gray, CV_32FC1, 1.0/255.0);
 
