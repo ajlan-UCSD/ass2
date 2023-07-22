@@ -49,7 +49,7 @@ int main(int argc, const char * argv[])
 		cap >> frame;
 		if(frame.empty()){ break; }
 
-		cvtColor(frame, gray, CV_BGR2GRAY);
+		cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
 		resize(gray, gray, Size(WIDTH, HEIGHT));
 		gray.convertTo(gray, CV_32FC1);
 

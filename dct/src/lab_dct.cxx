@@ -39,9 +39,10 @@ Mat lab_dct_naive(Mat input) {
 
 			for(int i = 0; i < HEIGHT; i++) {
 				for(int j = 0; j < WIDTH; j++) {
-					// Take a few minutes to complete this
+					// TODO: Take a few minutes to complete this
 					// line here given the definition of
 					// the DCT
+
 					value +=
 				}
 			}
