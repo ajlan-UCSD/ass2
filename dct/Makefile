@@ -21,7 +21,7 @@ OBJS := $(CXXSRCS:src/%.cxx=$(BUILD_DIR)%.o)
 CXXFLAGS += -Iinclude
 
 # Libraries
-LDFLAGS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs
+LDFLAGS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_videoio
 
 ###
 # Build rules
