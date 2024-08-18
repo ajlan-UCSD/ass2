@@ -1,49 +1,24 @@
-CXX?=g++
-CXXFLAGS=-O1
+CXX = aarch64-linux-android-clang++
+CXXFLAGS = -O1 -Iinclude -I/data/data/com.termux/files/usr/include/opencv4
+LDFLAGS = -L/data/data/com.termux/files/usr/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs
 
+BUILD_DIR = build
+SRC_DIR = src
+INCLUDE_DIR = include
 
-###
-# Setup & config
-###
+SOURCES = $(wildcard $(SRC_DIR)/*.cxx)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cxx,$(BUILD_DIR)/%.o,$(SOURCES))
+TARGET = vectest
 
-BUILD_DIR := build/
+all: $(TARGET)
 
-# What binary are we trying to build?
-BIN := vectest
+$(TARGET): $(OBJECTS)
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
-# C++ source files
-CXXSRCS := $(wildcard src/*.cxx)
-
-# Create list of objects to build
-OBJS := $(CXXSRCS:src/%.cxx=$(BUILD_DIR)%.o)
-
-# Any flags for the C++ compiler?
-CXXFLAGS += -Iinclude
-
-# Libraries
-LDFLAGS += -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_imgcodecs -lopencv_videoio
-
-###
-# Build rules
-###
-
-# Convention, `all` is a phony target that builds everything
-# and must be listed first
-.PHONY: all
-all:	$(BIN)
-
-# Binary depends on its objects (use default build rules)
-$(BIN): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(BIN) $(LDFLAGS)
-
-$(BUILD_DIR)%.o: src/%.cxx
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cxx
+	mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-###
-# Convenience targets
-###
-
-.PHONY: clean
 clean:
-	rm -rf build/*
-	rm -f $(BIN)
+	rm -rf $(BUILD_DIR) $(TARGET)
+

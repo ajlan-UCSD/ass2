@@ -1,6 +1,6 @@
 #include "main.h"
 #include <iostream>
-#include <opencv2/core.hpp>
+#include <opencv2/core.hpp> // Include necessary OpenCV headers
 
 using namespace cv;
 
@@ -17,10 +17,19 @@ float sf(int in) {
 
 // Initialize LUT
 void initDCT(int WIDTH, int HEIGHT) {
-    LUT_w = Mat(WIDTH, WIDTH, CV_32FC1);
-    for (int i = 0; i < WIDTH; i++) {
-        for (int j = 0; j < WIDTH; j++) {
-            LUT_w.at<float>(i, j) = cos(M_PI / WIDTH * (j + 0.5) * i) * sf(i);
+    // Initialize LUT matrices (or any other necessary setup)
+    LUT_w = Mat::zeros(WIDTH, WIDTH, CV_32FC1);
+    LUT_h = Mat::zeros(HEIGHT, HEIGHT, CV_32FC1);
+
+    // Fill LUT matrices with appropriate cosine values
+    for (int i = 0; i < WIDTH; ++i) {
+        for (int j = 0; j < WIDTH; ++j) {
+            LUT_w.at<float>(i, j) = cos(M_PI / (float)WIDTH * (j + 0.5) * i) * sf(i);
+        }
+    }
+    for (int i = 0; i < HEIGHT; ++i) {
+        for (int j = 0; j < HEIGHT; ++j) {
+            LUT_h.at<float>(i, j) = cos(M_PI / (float)HEIGHT * (j + 0.5) * i) * sf(i);
         }
     }
 }
@@ -28,12 +37,13 @@ void initDCT(int WIDTH, int HEIGHT) {
 // Naive DCT Implementation: O(N^4)
 Mat student_dct_naive(Mat input) {
     const int HEIGHT = input.rows;
-    const int WIDTH = input.cols;
+    const int WIDTH  = input.cols;  
+
     float scale = 2.0 / sqrt(HEIGHT * WIDTH);
     Mat result = Mat(HEIGHT, WIDTH, CV_32FC1);
 
     float* result_ptr = result.ptr<float>();
-    float* input_ptr = input.ptr<float>();
+    float* input_ptr  = input.ptr<float>();
 
     for (int x = 0; x < HEIGHT; x++) {
         for (int y = 0; y < WIDTH; y++) {
@@ -41,8 +51,8 @@ Mat student_dct_naive(Mat input) {
             for (int i = 0; i < HEIGHT; i++) {
                 for (int j = 0; j < WIDTH; j++) {
                     value += input_ptr[i * WIDTH + j]
-                        * cos(M_PI / ((float)HEIGHT) * (i + 1. / 2.) * (float)x)
-                        * cos(M_PI / ((float)WIDTH) * (j + 1. / 2.) * (float)y);
+                            * cos(M_PI / ((float)HEIGHT) * (i + 1. / 2.) * (float)x)
+                            * cos(M_PI / ((float)WIDTH) * (j + 1. / 2.) * (float)y);
                 }
             }
             value = scale * sf(x) * sf(y) * value;
@@ -55,7 +65,7 @@ Mat student_dct_naive(Mat input) {
 
 // Block DCT Implementation: Matrix Multiplication
 Mat student_dct_block(Mat input) {
-    assert(input.rows == input.cols);
+    assert(input.rows == input.cols);    
     int N = input.rows;
 
     std::cout << "Input matrix size: " << input.size() << std::endl;
@@ -78,12 +88,12 @@ Mat student_dct_unrolled(Mat input) {
 
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
-            float sum = 0;
+            float sum = 0;            
             for (int k = 0; k < N; k += 4) {
                 sum += LUT_w.at<float>(i, k) * input.at<float>(k, j)
-                    + LUT_w.at<float>(i, k + 1) * input.at<float>(k + 1, j)
-                    + LUT_w.at<float>(i, k + 2) * input.at<float>(k + 2, j)
-                    + LUT_w.at<float>(i, k + 3) * input.at<float>(k + 3, j);
+                     + LUT_w.at<float>(i, k+1) * input.at<float>(k+1, j)
+                     + LUT_w.at<float>(i, k+2) * input.at<float>(k+2, j)
+                     + LUT_w.at<float>(i, k+3) * input.at<float>(k+3, j);
             }
             temp.at<float>(i, j) = sum;
         }
@@ -94,9 +104,9 @@ Mat student_dct_unrolled(Mat input) {
             float sum = 0;
             for (int k = 0; k < N; k += 4) {
                 sum += temp.at<float>(i, k) * LUT_w.at<float>(j, k)
-                    + temp.at<float>(i, k + 1) * LUT_w.at<float>(j, k + 1)
-                    + temp.at<float>(i, k + 2) * LUT_w.at<float>(j, k + 2)
-                    + temp.at<float>(i, k + 3) * LUT_w.at<float>(j, k + 3);
+                     + temp.at<float>(i, k+1) * LUT_w.at<float>(j, k+1)
+                     + temp.at<float>(i, k+2) * LUT_w.at<float>(j, k+2)
+                     + temp.at<float>(i, k+3) * LUT_w.at<float>(j, k+3);
             }
             output.at<float>(i, j) = sum;
         }
@@ -113,15 +123,16 @@ Mat student_dct_neon(Mat input) {
 }
 
 // Wrapper Function for DCT Implementations
-Mat student_dct(Mat input, int version = 0) {
+cv::Mat student_dct(cv::Mat input, int version) {
     switch (version) {
-    case 1:
-        return student_dct_block(input);
-    case 2:
-        return student_dct_unrolled(input);
-    case 3:
-        return student_dct_neon(input);
-    default:
-        return student_dct_naive(input);
+        case 1:
+            return student_dct_block(input);
+        case 2:
+            return student_dct_unrolled(input);
+        case 3:
+            return student_dct_neon(input);
+        default:
+            return student_dct_naive(input);
     }
 }
+

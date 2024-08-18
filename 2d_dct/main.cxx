@@ -57,61 +57,36 @@ int main(int argc, const char *argv[]) {
         // OpenCV DCT
         dct(gray, dct_org);
 
-        // Naive DCT
+        // Your DCT Implementations
         LinuxTimer t;
+
+        // Naive DCT
         dct_student = student_dct(gray, 0); // Naive DCT
         t.stop();
         float myTimer = t.getElapsed();
 
-        absdiff(dct_org, dct_student, diff_img);
+        // Block DCT
+        dct_block = student_dct(gray, 1);
+
+        // Unrolled Block DCT
+        dct_unrolled = student_dct(gray, 2);
+
+        // Neon Block DCT (fallback to unrolled if not using NEON)
+        dct_neon = student_dct(gray, 3);
+
+        gray.convertTo(gray, CV_8UC1);
+
+        absdiff(dct_org, dct_student, diff_img); 
+
+        /* Calculating RMSE */
         diff_img = diff_img.mul(diff_img);
         Scalar se = sum(diff_img);
         mse = se[0] / ((float)HEIGHT * WIDTH);
-        printf("RMSE (Naive): %.4f\n", sqrt(mse));
+
+        count++;
 
         cout << "Execute time (Naive): " << (double)myTimer / 1000000000.0 << " seconds" << endl;
-
-        // Block DCT
-        t.start();
-        dct_block = student_dct(gray, 1);
-        t.stop();
-        myTimer = t.getElapsed();
-
-        absdiff(dct_org, dct_block, diff_img);
-        diff_img = diff_img.mul(diff_img);
-        se = sum(diff_img);
-        mse = se[0] / ((float)HEIGHT * WIDTH);
-        printf("RMSE (Block): %.4f\n", sqrt(mse));
-
-        cout << "Execute time (Block): " << (double)myTimer / 1000000000.0 << " seconds" << endl;
-
-        // Unrolled Block DCT
-        t.start();
-        dct_unrolled = student_dct(gray, 2);
-        t.stop();
-        myTimer = t.getElapsed();
-
-        absdiff(dct_org, dct_unrolled, diff_img);
-        diff_img = diff_img.mul(diff_img);
-        se = sum(diff_img);
-        mse = se[0] / ((float)HEIGHT * WIDTH);
-        printf("RMSE (Unrolled): %.4f\n", sqrt(mse));
-
-        cout << "Execute time (Unrolled): " << (double)myTimer / 1000000000.0 << " seconds" << endl;
-
-        // Neon Block DCT (fallback to unrolled if not using NEON)
-        t.start();
-        dct_neon = student_dct(gray, 3);
-        t.stop();
-        myTimer = t.getElapsed();
-
-        absdiff(dct_org, dct_neon, diff_img);
-        diff_img = diff_img.mul(diff_img);
-        se = sum(diff_img);
-        mse = se[0] / ((float)HEIGHT * WIDTH);
-        printf("RMSE (NEON): %.4f\n", sqrt(mse));
-
-        cout << "Execute time (NEON): " << (double)myTimer / 1000000000.0 << " seconds" << endl;
+        printf("RMSE (Naive): %.4f\n", sqrt(mse));
 
         // Save outputs for further analysis
         imwrite("original_frame_" + to_string(f) + ".png", gray);
@@ -122,6 +97,7 @@ int main(int argc, const char *argv[]) {
 
         // If you want to view the images using an external viewer:
         // system("termux-open idct_output_frame_" + to_string(f) + ".png");
+
     }
 
     return 0;
